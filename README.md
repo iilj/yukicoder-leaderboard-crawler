@@ -7,6 +7,12 @@ yukicoder-leaderboard-crawler
 - クローラは Ruby, ロジスティクス回帰の計算は Python で書いてあります．
 - 雑な作りですが，テスト用なのでご勘弁を．
 
+
+## データベース構成
+
+![db](https://github.com/iilj/yukicoder-leaderboard-crawler/blob/master/out/uml/db/db.png?raw=true)
+
+
 ## 使用方法
 
 ### 準備
