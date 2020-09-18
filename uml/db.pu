@@ -1,0 +1,86 @@
+@startuml db
+
+' hide the spot
+hide circle
+
+' 線が角度付きにならないようにする
+skinparam linetype ortho
+
+package yukicoder {
+    entity Contests {
+        *contest_id : number
+        --
+        +name : text
+        +datetime : number
+        +crawled : bool
+    }
+
+    entity Problems {
+        *problem_id : number
+        --
+        *problem_no : number
+        +title : text
+        +author_id : text <<FK>>
+        +tester_id : text <<FK>>
+        +level : number
+    }
+
+    entity ContestProblemMap {
+        *contest_id : number <<FK>>
+        *problem_id : number <<FK>>
+    }
+
+    entity Users {
+        *user_id : number
+        --
+        *name : text
+        +twitter_screeen_name : text
+        +url : text
+        +crawled : bool
+        +mapping_calculated : bool
+    }
+
+    entity UserContestProblemResults {
+        *user_id : number <<FK>>
+        *problem_id : number <<FK>>
+        --
+        *solved : bool
+    }
+
+    Contests ||--|{ ContestProblemMap
+    Problems ||--|{ ContestProblemMap
+    
+    Users ||--|{ UserContestProblemResults
+    Problems ||--|{ UserContestProblemResults
+}
+
+package AtCoder {
+    entity AtCoderUser {
+        *user_name : text
+        --
+        +twitter_screen_name : text
+        +datetime_history_last_crawled : number
+    }
+
+    entity AtCoderUserRatingHistory {
+        *user_name : text <<FK>>
+        *datetime : number
+        --
+        *performance : number
+        *inner_performance : number
+        *rating : number
+        *inner_rating : number
+    }
+
+    AtCoderUser ||--|{ AtCoderUserRatingHistory
+}
+
+entity yukicoderAtCoderUserMap {
+    *yukicoder_user_id : number <<FK>>
+    *atcoder_user_name : text <<FK>>
+}
+
+Users ||--|{ yukicoderAtCoderUserMap
+AtCoderUser ||--|{ yukicoderAtCoderUserMap
+
+@enduml
