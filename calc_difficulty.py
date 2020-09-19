@@ -7,9 +7,9 @@ import sqlite3
 import sys
 
 
-def get_data(problem_id: int = 5075) -> (list, list):
+def get_data(problem_id: int = 5075) -> (list, list, list):
     conn = sqlite3.connect("db.db")
-    sql = 'SELECT C.inner_rating, A.solved, B.atcoder_user_name FROM UserContestProblemResults AS A ' \
+    sql = 'SELECT C.inner_rating, A.solved, A.user_id, B.atcoder_user_name FROM UserContestProblemResults AS A ' \
         + 'INNER JOIN yukicoderAtCoderUserMap AS B ON A.user_id = B.yukicoder_user_id ' \
         + 'INNER JOIN AtCoderUserRatingHistory AS C ON C.user_name = B.atcoder_user_name ' \
         + 'WHERE A.problem_id = ? AND C.datetime = (' \
@@ -23,12 +23,16 @@ def get_data(problem_id: int = 5075) -> (list, list):
         + 'ORDER BY C.inner_rating'
     inner_rating = []
     solved = []
+    user_id = []
+    atcoder_user_name = []
     for row in conn.execute(sql, (problem_id, problem_id)):
         # print(row)
         inner_rating.append([row[0]])
         solved.append(row[1])
+        user_id.append(row[2])
+        atcoder_user_name.append(row[3])
     conn.close()
-    return (inner_rating, solved)
+    return (inner_rating, solved, user_id, atcoder_user_name)
 
 
 def estimate(inner_rating: list, solved: list):
@@ -103,7 +107,15 @@ if __name__ == "__main__":
         exit()
 
     problem_id = int(sys.argv[1])
-    inner_rating, solved = get_data(problem_id)
+    inner_rating, solved, user_id, atcoder_user_name = get_data(problem_id)
+
+    # print raw data
+    print("Raw data:")
+    for _inner_rating, _solved, _user_id, _atcoder_user_name in zip(inner_rating, solved, user_id, atcoder_user_name):
+        print(_inner_rating, _solved, _user_id, _atcoder_user_name)
+    print(f" (size = {len(solved)})")
+    print("")
+
     if len(solved) < 2:
         print(f"data size is too small ({len(solved)})")
         exit()
