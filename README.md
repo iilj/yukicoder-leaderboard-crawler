@@ -61,6 +61,13 @@ $ ruby crawl_userpage.rb
 $ ruby crawl_atcoder_user.rb
 ```
 
+#### 代替手段：手動でマッピングする
+
+```sh
+$ ruby add_user_map.rb -l            # マッピングが設定されていないユーザ一覧
+$ ruby add_user_map.rb -a 1234,abcd  # yukicoder userid=1234, atcoder username=abcd のマップを登録
+```
+
 ### yukicoder ユーザにマップされた AtCoder ユーザのコンテスト履歴のクロール
 
 #### 全ユーザをクロールする場合
