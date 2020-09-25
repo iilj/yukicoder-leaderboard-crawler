@@ -63,8 +63,26 @@ $ ruby crawl_atcoder_user.rb
 
 ### yukicoder ユーザにマップされた AtCoder ユーザのコンテスト履歴のクロール
 
+#### 全ユーザをクロールする場合
+
 ```sh
-$ ruby crawl_atcoder_history.rb
+$ ruby crawl_atcoder_history.rb -a
+```
+
+#### min 分以上経っている人のみクロールする場合
+
+例：1440分（=1日）以上経っている人のみクロールするとき
+
+```sh
+$ ruby crawl_atcoder_history.rb -m 1440
+```
+
+#### ある問題が出題されたコンテストに出た人のみクロールする版
+
+例：問題ID 4455 の問題が出題されたコンテストに出た人のみクロールする版
+
+```sh
+$ ruby crawl_atcoder_history.rb -p 4455
 ```
 
 ### difficulty の計算結果出力

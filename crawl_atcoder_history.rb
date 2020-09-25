@@ -1,6 +1,7 @@
 require_relative './modules/atcoder_history'
 require 'sqlite3'
 require 'time'
+require 'optparse'
 
 def crawl_atcoder_history_by_user_list(db, users)
     sec = 10
@@ -33,6 +34,9 @@ def crawl_atcoder_history_by_user_list(db, users)
             cnt += 1
         }
         puts " -> #{cnt} line(s) inserted"
+
+        sql = 'UPDATE AtCoderUser SET datetime_history_last_crawled = ? WHERE user_name = ?'
+        db.execute(sql, Time.now.to_i, atcoder_user_name)
 
         if idx < users.length - 1
             puts " -> sleeping for #{sec} sec..."
@@ -68,6 +72,23 @@ end
 
 if __FILE__ == $0
     db = SQLite3::Database.new("db.db")
-    main_crawl_atcoder_history_min(db, 60 * 24 * 7)
-    # main_crawl_atcoder_history_contest(db, 4455)
+
+    opt = OptionParser.new
+    opt.on('-p', '--problem_id PID', 'crawl records of whom has UserContestProblemResults of specified problem_id') {|v|
+        problem_id = v.to_i
+        puts "problem_id = #{problem_id}"
+        # main_crawl_atcoder_history_contest(db, 4455)
+        main_crawl_atcoder_history_contest(db, problem_id)
+    }
+    opt.on('-m', '--minutes MIN', 'crawl records of whom has no record in specified minutes') {|v|
+        minutes = v.to_i
+        puts "[minutes = #{minutes}]"
+        # main_crawl_atcoder_history_min(db, 60 * 24 * 7)
+        main_crawl_atcoder_history_min(db, minutes)
+    }
+    opt.on('-a', '--all', 'crawl all records') {
+        puts "[all]"
+        main_crawl_atcoder_history(db)
+    }
+    opt.parse(ARGV)
 end

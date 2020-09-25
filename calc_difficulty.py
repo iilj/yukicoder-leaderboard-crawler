@@ -7,7 +7,7 @@ import sqlite3
 import sys
 
 
-def get_data(problem_id: int = 5075) -> (list, list, list):
+def get_data(problem_id: int = 5075) -> (list, list, list, list):
     conn = sqlite3.connect("db.db")
     sql = 'SELECT C.inner_rating, A.solved, A.user_id, B.atcoder_user_name FROM UserContestProblemResults AS A ' \
         + 'INNER JOIN yukicoderAtCoderUserMap AS B ON A.user_id = B.yukicoder_user_id ' \
