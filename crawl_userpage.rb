@@ -2,11 +2,11 @@ require_relative './modules/userpage'
 require 'sqlite3'
 
 def insert_userpage(db, user_id)
-    user_name, twitter, url  = get_userpage(user_id)
+    user_name, twitter, atcoder_user_name, url  = get_userpage(user_id)
     # user_name は捨てる
 
-    sql = 'UPDATE Users SET twitter_screen_name = ?, url = ?, crawled = 1 WHERE user_id = ?'
-    db.execute(sql, twitter, url, user_id)
+    sql = 'UPDATE Users SET twitter_screen_name = ?, atcoder_user_name = ?, url = ?, crawled = 1 WHERE user_id = ?'
+    db.execute(sql, twitter, atcoder_user_name, url, user_id)
 end
 
 def main_crawl_userpage(db)

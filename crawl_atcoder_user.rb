@@ -1,16 +1,16 @@
 require_relative './modules/atcoder_user'
 require 'sqlite3'
 
-def try_map_user(user_id, name, twitter_screen_name, url)
+def try_map_user(user_id, name, twitter_screen_name, url, atcoder_user_name)
     re = /https?:\/\/atcoder\.jp\/users\/([a-zA-Z0-9_]+)/
     re_name = /^([a-zA-Z0-9_]+)$/
     sec = 5
 
-    atcoder_user_name = nil
+    # atcoder_user_name = nil
     iRequestFlag = 0
 
     # url に書いてくれてあるとき
-    if url != nil
+    if atcoder_user_name == nil && url != nil
         m = re.match(url)
         if m
             atcoder_user_name = m[1]
@@ -56,19 +56,19 @@ def try_map_user(user_id, name, twitter_screen_name, url)
 end
 
 def main_crawl_atcoder_user(db)
-    sql = 'SELECT user_id, name, twitter_screen_name, url FROM Users WHERE crawled = 1 and mapping_calculated = 0'
+    sql = 'SELECT user_id, name, twitter_screen_name, atcoder_user_name, url FROM Users WHERE crawled = 1 and mapping_calculated = 0'
     users = db.execute(sql)
     
     sec = 5
     users.each_with_index{|user, idx|
-        user_id, name, twitter_screen_name, url = user
+        user_id, name, twitter_screen_name, atcoder_user_name, url = user
 
         rem = sec * (users.length - 1 - idx) / 60
         rem_h = rem / 60
         rem_m = (rem - rem_h * 60).to_s.rjust(2, "0")
         puts "processing user #{name} (#{user_id}) (index #{idx} / #{users.length}, approx. #{rem_h}:#{rem_m} remaining)..."
         
-        atcoder_user_name, iRequestFlag = try_map_user(user_id, name, twitter_screen_name, url)
+        atcoder_user_name, iRequestFlag = try_map_user(user_id, name, twitter_screen_name, url, atcoder_user_name)
 
         # マッピング登録
         if atcoder_user_name != nil
@@ -93,7 +93,37 @@ def main_crawl_atcoder_user(db)
     }
 end
 
+# 仮：プロフィール情報を使ってアップデートする
+def main_map_from_yukicoder_profile(db)
+    sql = 'SELECT user_id, name, twitter_screen_name, atcoder_user_name, url FROM Users WHERE crawled = 1' #  and mapping_calculated = 0
+    users = db.execute(sql)
+    users.each_with_index{|user, idx|
+        user_id, name, twitter_screen_name, atcoder_user_name, url = user
+        if atcoder_user_name != nil
+            puts "#{user_id}: #{name} -> #{atcoder_user_name}"
+            sql = 'SELECT atcoder_user_name FROM yukicoderAtCoderUserMap WHERE yukicoder_user_id = ?'
+            atcoder_user_name_db = db.execute(sql, user_id)
+            if atcoder_user_name_db.length == 0
+                puts " -> Not registered" # 新たに挿入すればよい
+                sql = 'INSERT OR IGNORE INTO AtCoderUser(user_name, twitter_screen_name) VALUES(?,?)'
+                db.execute(sql, atcoder_user_name, twitter_screen_name)
+                sql = 'INSERT OR IGNORE INTO yukicoderAtCoderUserMap(yukicoder_user_id, atcoder_user_name) VALUES(?,?)'
+                db.execute(sql, user_id, atcoder_user_name)
+            elsif atcoder_user_name_db[0][0].downcase == atcoder_user_name.downcase
+                puts " -> OK" # 何もしなくてよい
+            else
+                puts " -> Bad (profile=#{atcoder_user_name}, db=#{atcoder_user_name_db[0][0]})" # atcoder_user_name のほうで上書き
+                sql = 'INSERT OR IGNORE INTO AtCoderUser(user_name, twitter_screen_name) VALUES(?,?)'
+                db.execute(sql, atcoder_user_name, twitter_screen_name)
+                sql = 'UPDATE yukicoderAtCoderUserMap SET atcoder_user_name = ? WHERE yukicoder_user_id = ?'
+                db.execute(sql, atcoder_user_name, user_id)
+            end
+        end
+    }
+end
+
 if __FILE__ == $0
     db = SQLite3::Database.new("db.db")
     main_crawl_atcoder_user(db)
+    # main_map_from_yukicoder_profile(db)
 end

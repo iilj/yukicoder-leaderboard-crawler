@@ -12,6 +12,7 @@ package yukicoder {
         --
         +name : text
         +datetime : number
+        +datetime_end : number
         +crawled : bool
     }
 
@@ -35,6 +36,7 @@ package yukicoder {
         --
         *name : text
         +twitter_screeen_name : text
+        +atcoder_user_name : text
         +url : text
         +crawled : bool
         +mapping_calculated : bool
@@ -47,11 +49,24 @@ package yukicoder {
         *solved : bool
     }
 
+    entity Submissions {
+        *submission_id : number
+        --
+        +datetime : number
+        +user_id : number <<FK>>
+        +problem_no : number
+        +label : text
+    }
+
     Contests ||--|{ ContestProblemMap
     Problems ||--|{ ContestProblemMap
     
     Users ||--|{ UserContestProblemResults
     Problems ||--|{ UserContestProblemResults
+    Users ||-right-|{ Problems
+
+    Users ||-up-|{ Submissions
+    Problems ||-up-|{ Submissions
 }
 
 package AtCoder {
