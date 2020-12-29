@@ -45,7 +45,25 @@ def main_crawl_contest_submissions(db, contest_id)
         puts "Processing page #{page}"
         cnt = 0
         # array of [iSubmissionId, iTime, iUserId, iProblemNo, sLabel]
-        submissions_of_page = get_contest_submissions_page(contest_id, page)
+        submissions_of_page = nil
+        request_cnt = 0
+        loop {
+            begin
+                request_cnt += 1
+                submissions_of_page = get_contest_submissions_page(contest_id, page)
+                puts " -> Request OK"
+                break
+            rescue => exception
+                if request_cnt >= 3
+                    10.times{ system "paplay /usr/share/sounds/freedesktop/stereo/dialog-error.oga" }
+                    puts "Failed to get resource"
+                    exit
+                end
+                3.times{ system "paplay /usr/share/sounds/freedesktop/stereo/dialog-error.oga" }
+                puts "SLEEP 3, request_cnt=#{request_cnt}"
+                sleep 3.0
+            end
+        }
         submissions_of_page.each {|submission|
             iSubmissionId, iTime, iUserId, iProblemNo, sLabel = submission
             if iTime < datetime

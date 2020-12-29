@@ -1,4 +1,4 @@
-from calc_difficulty import get_data, estimate, fix_float
+from calc_difficulty import get_data, estimate, fix_float, fit_2plm_irt
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 import matplotlib as mpl
@@ -44,19 +44,24 @@ ERROR_DATA_TOO_FEW = -4
 
 
 def calc_coef_bias(inner_rating: List[List[float]], inner_rating_flatten: List[float], solved: List[bool]) -> Tuple[float, float, float]:
-    coef, bias = estimate(inner_rating, solved)
-    if coef < 0:
-        print(f" -> coef is weird ({coef}) 🥺")
-        return ERROR_COEF_IS_WEIRD, -1, -1
+    # coef, bias = estimate(inner_rating, solved)
+    # if coef < 0:
+    #     print(f" -> coef is weird ({coef}) 🥺")
+    #     return ERROR_COEF_IS_WEIRD, -1, -1
 
-    diff = -bias / coef
-    diff = int(fix_float(diff))
+    # diff = -bias / coef
+    # diff = int(fix_float(diff))
 
-    mi = min(inner_rating_flatten)
+    inner_rating = [x[0] for x in inner_rating]
+    diff, discrimination = fit_2plm_irt(inner_rating, solved)
+    coef = discrimination
+    bias = -coef * diff
+
+    # mi = min(inner_rating_flatten)
     # print(diff, mi)
-    if diff + 400 < mi:
-        print(f" -> difficulty seems not optimal ({diff}) 🥺")
-        return ERROR_DIFF_NOT_OPTIMAL, -1, -1
+    # if diff + 400 < mi:
+    #     print(f" -> difficulty seems not optimal ({diff}) 🥺")
+    #     return ERROR_DIFF_NOT_OPTIMAL, -1, -1
     print(f" -> difficulty = {diff} 🐶")
     return diff, coef, bias
 
@@ -100,31 +105,32 @@ def calc_difficulty_from_submissions(conn, problem_no: int, datetime_end: int):
         atcoder_user_name.append(submission[3])
     # print(inner_rating, solved, user_id, atcoder_user_name)
 
-    if len(solved) < 2:
+    if len(solved) < 1:
         print(f"data size is too small ({len(solved)})")
         return ERROR_DATA_TOO_FEW, -1, -1, False, inner_rating_flatten, solved, user_id, atcoder_user_name
-    if np.unique(solved).size != 2:
-        print(f"data is uniform ({solved[0]})")
-        if solved[0] == True:
-            # 全員正解
-            # ダミーデータ挿入
-            print(" -> 🧪")
-            aug_inner_rating, aug_inner_rating_flatten, aug_solved = augment_data(inner_rating_flatten, solved)
-            diff, coef, bias = calc_coef_bias(aug_inner_rating, aug_inner_rating_flatten, aug_solved)
-            augmented = True
-        else:
-            # 全員不正解
-            return ERROR_DIFF_INF, -1, -1
+    # if np.unique(solved).size != 2:
+    #     print(f"data is uniform ({solved[0]})")
+    #     if solved[0] == True:
+    #         # 全員正解
+    #         # ダミーデータ挿入
+    #         print(" -> 🧪")
+    #         aug_inner_rating, aug_inner_rating_flatten, aug_solved = augment_data(inner_rating_flatten, solved)
+    #         diff, coef, bias = calc_coef_bias(aug_inner_rating, aug_inner_rating_flatten, aug_solved)
+    #         augmented = True
+    #     else:
+    #         # 全員不正解
+    #         return ERROR_DIFF_INF, -1, -1
     else:
         diff, coef, bias = calc_coef_bias(inner_rating, inner_rating_flatten, solved)
         augmented = False
-        if diff == ERROR_COEF_IS_WEIRD or diff == ERROR_DIFF_NOT_OPTIMAL:
-            # ダミーデータ挿入
-            print(" -> 🧪")
-            aug_inner_rating, aug_inner_rating_flatten, aug_solved = augment_data(inner_rating_flatten, solved)
-            diff, coef, bias = calc_coef_bias(aug_inner_rating, aug_inner_rating_flatten, aug_solved)
-            augmented = True
+        # if diff == ERROR_COEF_IS_WEIRD or diff == ERROR_DIFF_NOT_OPTIMAL:
+        #     # ダミーデータ挿入
+        #     print(" -> 🧪")
+        #     aug_inner_rating, aug_inner_rating_flatten, aug_solved = augment_data(inner_rating_flatten, solved)
+        #     diff, coef, bias = calc_coef_bias(aug_inner_rating, aug_inner_rating_flatten, aug_solved)
+        #     augmented = True
 
+    augmented = True
     return diff, coef, bias, augmented, inner_rating_flatten, solved, user_id, atcoder_user_name
 
 

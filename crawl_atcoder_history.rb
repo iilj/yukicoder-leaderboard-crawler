@@ -19,7 +19,25 @@ def crawl_atcoder_history_by_user_list(db, users)
         end
 
         # 履歴を取得する
-        history = atcoder_get_history_with_inner_rating(atcoder_user_name)
+        history = nil
+        request_cnt = 0
+        loop {
+            begin
+                request_cnt += 1
+                history = atcoder_get_history_with_inner_rating(atcoder_user_name)
+                puts " -> Request OK"
+                break
+            rescue => exception
+                if request_cnt >= 3
+                    10.times{ system "paplay /usr/share/sounds/freedesktop/stereo/dialog-error.oga" }
+                    puts "Failed to get resource"
+                    exit
+                end
+                3.times{ system "paplay /usr/share/sounds/freedesktop/stereo/dialog-error.oga" }
+                puts "SLEEP 3, request_cnt=#{request_cnt}"
+                sleep 3.0
+            end
+        }
         
         # 履歴を格納する
         cnt = 0
@@ -43,6 +61,8 @@ def crawl_atcoder_history_by_user_list(db, users)
             sleep sec
         end
     }
+    puts "crawl completed"
+    5.times{ system "paplay /usr/share/sounds/freedesktop/stereo/complete.oga" }
 end
 
 # とりあえず全部クロールする版

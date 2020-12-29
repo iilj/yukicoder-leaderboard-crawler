@@ -25,8 +25,8 @@ def insert_contests(db)
         #   "Id"=>280, "Name"=>"yukicoder contest 265", "Date"=>"2020-09-11T21:20:00+09:00", "EndDate"=>"2020-09-11T23:20:00+09:00",
         #   "ProblemIdList"=>[4856, 4612, 4833, 5075, 4455, 4613]
         # }
-        sql = 'INSERT OR IGNORE INTO Contests(contest_id, name, datetime) VALUES(?,?,?)'
-        db.execute(sql, contest['Id'], contest['Name'], Time.parse(contest['Date']).to_i)
+        sql = 'INSERT OR IGNORE INTO Contests(contest_id, name, datetime, datetime_end) VALUES(?,?,?,?)'
+        db.execute(sql, contest['Id'], contest['Name'], Time.parse(contest['Date']).to_i, Time.parse(contest['EndDate']).to_i)
 
         contest['ProblemIdList'].each{|problem_id|
             sql = 'INSERT OR IGNORE INTO ContestProblemMap(contest_id, problem_id) VALUES(?,?)'

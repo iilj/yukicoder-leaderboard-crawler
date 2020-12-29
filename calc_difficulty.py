@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sqlite3
 import sys
+import math
+from typing import List
 
 
 def get_data(problem_id: int = 5075) -> (list, list, list, list):
@@ -35,7 +37,28 @@ def get_data(problem_id: int = 5075) -> (list, list, list, list):
     return (inner_rating, solved, user_id, atcoder_user_name)
 
 
-def estimate(inner_rating: list, solved: list):
+def _fit_1plm_binary_search(xs, positive_count):
+    discrimination: float = math.log(6.) / 400.
+    lb, ub = -10000, 10000
+    accepts = positive_count
+    while ub - lb > 1:
+        m = (ub + lb) // 2
+        expected_accepts = 0
+        for x in xs:
+            expected_accepts += 1. / (1. + (6. ** ((m - x) / 400.)))
+        if expected_accepts < accepts:
+            ub = m
+        else:
+            lb = m
+    difficulty = lb
+    return difficulty, discrimination
+
+
+def fit_2plm_irt(xs: List[float], ys: List[int]):
+    return _fit_1plm_binary_search(xs, sum(ys))
+
+
+def estimate(inner_rating: List[List[float]], solved: List[int]):
     # append dummy data
     sz = len(solved)
     # inf = 100000.0
@@ -123,6 +146,8 @@ if __name__ == "__main__":
         print(f"data is uniform ({solved[0]})")
         exit()
     coef, bias = estimate(inner_rating, solved)
+    # inner_rating = [t[0] for t in inner_rating]
+    # print(fit_2plm_irt(inner_rating, solved))
     if coef < 0:
         print(f"coef is weird ({coef})")
         exit()
