@@ -56,6 +56,7 @@ def calc_coef_bias(inner_rating: List[List[float]], inner_rating_flatten: List[f
     diff, discrimination = fit_2plm_irt(inner_rating, solved)
     coef = discrimination
     bias = -coef * diff
+    diff = int(fix_float(diff))
 
     # mi = min(inner_rating_flatten)
     # print(diff, mi)
@@ -220,35 +221,40 @@ def main_from_leaderboard(conn):
 
         inner_rating, solved, user_id, atcoder_user_name = get_data(problem_id)
         inner_rating_flatten = [x[0] for x in inner_rating]
-        if len(solved) < 2:
+        if len(solved) < 1:
             print(f" -> data size is too small ({len(solved)}) 🥺")
             continue
-        if np.unique(solved).size != 2:
-            print(f" -> data is uniform ({solved[0]}) 🥺")
-            if solved[0] == True:
-                # 全員正解
-                # ダミーデータ挿入
-                print(" -> 🧪")
-                aug_inner_rating, aug_inner_rating_flatten, aug_solved = augment_data(inner_rating_flatten, solved)
-                diff, coef, bias = calc_coef_bias(aug_inner_rating, aug_inner_rating_flatten, aug_solved)
-                augmented = True
-            else:
-                # 全員不正解
-                continue
+        # if np.unique(solved).size != 2:
+        #     print(f" -> data is uniform ({solved[0]}) 🥺")
+        #     if solved[0] == True:
+        #         # 全員正解
+        #         # ダミーデータ挿入
+        #         print(" -> 🧪")
+        #         aug_inner_rating, aug_inner_rating_flatten, aug_solved = augment_data(inner_rating_flatten, solved)
+        #         diff, coef, bias = calc_coef_bias(aug_inner_rating, aug_inner_rating_flatten, aug_solved)
+        #         augmented = True
+        #     else:
+        #         # 全員不正解
+        #         continue
         else:
-            coef, bias = estimate(inner_rating, solved)
+            # coef, bias = estimate(inner_rating, solved)
             augmented = False
-            if coef < 0:
-                print(f" -> coef is weird ({coef}) 🥺")
-                # ダミーデータ挿入
-                print(" -> 🧪")
-                aug_inner_rating, aug_inner_rating_flatten, aug_solved = augment_data(inner_rating_flatten, solved)
-                diff, coef, bias = calc_coef_bias(aug_inner_rating, aug_inner_rating_flatten, aug_solved)
-                augmented = True
-                continue
+            # if coef < 0:
+            #     print(f" -> coef is weird ({coef}) 🥺")
+            #     # ダミーデータ挿入
+            #     print(" -> 🧪")
+            #     aug_inner_rating, aug_inner_rating_flatten, aug_solved = augment_data(inner_rating_flatten, solved)
+            #     diff, coef, bias = calc_coef_bias(aug_inner_rating, aug_inner_rating_flatten, aug_solved)
+            #     augmented = True
+            #     continue
+            inner_rating = [x[0] for x in inner_rating]
+            diff, discrimination = fit_2plm_irt(inner_rating, solved)
+            coef = discrimination
+            bias = -coef * diff
+            diff = int(fix_float(diff))
 
-        diff = -bias / coef
-        diff = int(fix_float(diff))
+        # diff = -bias / coef
+        # diff = int(fix_float(diff))
         print(f" -> difficulty = {diff} 🐶")
         difficulties[problem_id] = (diff, coef, bias, augmented)
 
@@ -276,6 +282,7 @@ def main_from_leaderboard(conn):
 
 def main():
     contest_id_list = [
+        300,  # Advent Calendar Contest 2020
         245,  # Advent Calendar Contest 2019
         211,  # Advent Calendar Contest 2018
         182,  # Advent Calendar Contest 2017

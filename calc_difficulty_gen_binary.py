@@ -34,6 +34,7 @@ def main():
         diff, discrimination = fit_2plm_irt(inner_rating, solved)
         coef = discrimination
         bias = -coef * diff
+        diff = int(fix_float(diff))
 
         print(f" -> difficulty = {diff} 🐶")
         difficulties[problem_id] = diff
