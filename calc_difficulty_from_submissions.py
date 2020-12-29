@@ -60,7 +60,7 @@ def calc_coef_bias(inner_rating: List[List[float]], inner_rating_flatten: List[f
 
     mi = min(inner_rating_flatten)
     # print(diff, mi)
-    if diff + 400 < mi:
+    if diff + 200 < mi:
         print(f" -> difficulty seems not optimal ({diff}) 🥺")
         return ERROR_DIFF_NOT_OPTIMAL, -1, -1
     print(f" -> difficulty = {diff} 🐶")
