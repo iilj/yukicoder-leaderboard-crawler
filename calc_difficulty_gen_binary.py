@@ -15,7 +15,7 @@ def main():
         print(f"Problem id = {problem_id}")
 
         inner_rating, solved, user_id, atcoder_user_name = get_data(problem_id)
-        if len(solved) < 1:
+        if len(solved) < 2:
             print(f" -> data size is too small ({len(solved)}) 🥺")
             continue
         if np.unique(solved).size != 2:

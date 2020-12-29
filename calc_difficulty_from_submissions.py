@@ -106,7 +106,7 @@ def calc_difficulty_from_submissions(conn, problem_no: int, datetime_end: int):
         atcoder_user_name.append(submission[3])
     # print(inner_rating, solved, user_id, atcoder_user_name)
 
-    if len(solved) < 1:
+    if len(solved) < 2:
         print(f"data size is too small ({len(solved)})")
         return ERROR_DATA_TOO_FEW, -1, -1, False, inner_rating_flatten, solved, user_id, atcoder_user_name
     if np.unique(solved).size != 2:
@@ -221,7 +221,7 @@ def main_from_leaderboard(conn):
 
         inner_rating, solved, user_id, atcoder_user_name = get_data(problem_id)
         inner_rating_flatten = [x[0] for x in inner_rating]
-        if len(solved) < 1:
+        if len(solved) < 2:
             print(f" -> data size is too small ({len(solved)}) 🥺")
             continue
         if np.unique(solved).size != 2:
