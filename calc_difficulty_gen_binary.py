@@ -18,9 +18,9 @@ def main():
         if len(solved) < 1:
             print(f" -> data size is too small ({len(solved)}) 🥺")
             continue
-        # if np.unique(solved).size != 2:
-        #     print(f" -> data is uniform ({solved[0]}) 🥺")
-        #     continue
+        if np.unique(solved).size != 2:
+            print(f" -> data is uniform ({solved[0]}) 🥺")
+            continue
 
         # coef, bias = estimate(inner_rating, solved)
         # if coef < 0:
