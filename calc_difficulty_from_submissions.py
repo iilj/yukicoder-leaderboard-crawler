@@ -109,7 +109,7 @@ def calc_difficulty_from_submissions(conn, problem_no: int, datetime_end: int):
     if len(solved) < 1:
         print(f"data size is too small ({len(solved)})")
         return ERROR_DATA_TOO_FEW, -1, -1, False, inner_rating_flatten, solved, user_id, atcoder_user_name
-    # if np.unique(solved).size != 2:
+    if np.unique(solved).size != 2:
         print(f"data is uniform ({solved[0]})")
         if solved[0] == True:
             # 全員正解
