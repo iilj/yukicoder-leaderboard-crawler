@@ -90,25 +90,56 @@ def main_crawl_atcoder_history_contest(db, problem_id)
     crawl_atcoder_history_by_user_list(db, users)
 end
 
+# ある問題が出題されたコンテストに出た人で，かつ min 分以上経っている人のみクロールする版
+def main_crawl_atcoder_history_contest_min(db, problem_id, min)
+    # UserContestProblemResults に problem_id の記録があるユーザの yukicoder userid
+    # -> そのユーザの atcoder_user_name，と辿る
+    cur = Time.now.to_i - 60 * min
+    sql = 'SELECT A.user_name FROM AtCoderUser AS A ' \
+        + ' INNER JOIN yukicoderAtCoderUserMap AS B ON A.user_name = B.atcoder_user_name ' \
+        + ' WHERE A.datetime_history_last_crawled < ? ' \
+        + ' AND B.yukicoder_user_id IN (SELECT user_id FROM UserContestProblemResults WHERE problem_id = ?)'
+    users = db.execute(sql, cur, problem_id).flatten
+    crawl_atcoder_history_by_user_list(db, users)
+end
+
 if __FILE__ == $0
     db = SQLite3::Database.new("db.db")
+
+    problem_id = -1
+    minutes = -1
+    all = false
 
     opt = OptionParser.new
     opt.on('-p', '--problem_id PID', 'crawl records of whom has UserContestProblemResults of specified problem_id') {|v|
         problem_id = v.to_i
         puts "problem_id = #{problem_id}"
         # main_crawl_atcoder_history_contest(db, 4455)
-        main_crawl_atcoder_history_contest(db, problem_id)
+        # main_crawl_atcoder_history_contest(db, problem_id)
     }
     opt.on('-m', '--minutes MIN', 'crawl records of whom has no record in specified minutes') {|v|
         minutes = v.to_i
         puts "[minutes = #{minutes}]"
         # main_crawl_atcoder_history_min(db, 60 * 24 * 7)
-        main_crawl_atcoder_history_min(db, minutes)
+        # main_crawl_atcoder_history_min(db, minutes)
     }
     opt.on('-a', '--all', 'crawl all records') {
         puts "[all]"
-        main_crawl_atcoder_history(db)
+        # main_crawl_atcoder_history(db)
+        all = true
     }
     opt.parse(ARGV)
+
+    puts problem_id, minutes, all
+    if all
+        main_crawl_atcoder_history(db)
+    elsif problem_id != -1 && minutes != -1
+        main_crawl_atcoder_history_contest_min(db, problem_id, minutes)
+    elsif problem_id != -1
+        main_crawl_atcoder_history_contest(db, problem_id)
+    elsif minutes != -1
+        main_crawl_atcoder_history_min(db, minutes)
+    else
+        puts "argument is invalid"
+    end
 end

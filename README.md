@@ -95,7 +95,8 @@ $ ruby crawl_atcoder_history.rb -p 4455
 ### difficulty の計算結果出力
 
 ```sh
-$ python calc_difficulty_gen.py
+$ python calc_difficulty_gen_binary.py
+$ python calc_difficulty_from_submissions.py
 ```
 
 ### 補足：単一の問題 ID を指定しての difficulty 推定結果確認
