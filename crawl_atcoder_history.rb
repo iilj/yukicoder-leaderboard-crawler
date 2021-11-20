@@ -4,7 +4,7 @@ require 'time'
 require 'optparse'
 
 def crawl_atcoder_history_by_user_list(db, users)
-    sec = 10
+    sec = 3
     users.each_with_index{|atcoder_user_name, idx|
         rem = sec * (users.length - 1 - idx) / 60
         rem_h = rem / 60

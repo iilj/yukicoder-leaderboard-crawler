@@ -19,15 +19,15 @@ def try_map_user(user_id, name, twitter_screen_name, url, atcoder_user_name)
     end
 
     # Unofficial API + twitter screen name 経由で
-    if atcoder_user_name == nil && twitter_screen_name != nil
-        # AtCoder ユーザと結び付けられたらOK
-        data = atcoder_unofficial_api_from_twitter(twitter_screen_name)["data"]
-        if data != nil && data["username"] != nil
-            atcoder_user_name = data["username"]
-            puts " -> source: Unofficial API 😺"
-        end
-        iRequestFlag |= 1
-    end
+    # if atcoder_user_name == nil && twitter_screen_name != nil
+    #     # AtCoder ユーザと結び付けられたらOK
+    #     data = atcoder_unofficial_api_from_twitter(twitter_screen_name)["data"]
+    #     if data != nil && data["username"] != nil
+    #         atcoder_user_name = data["username"]
+    #         puts " -> source: Unofficial API 😺"
+    #     end
+    #     iRequestFlag |= 1
+    # end
 
     # yukicoder と同一ユーザ名
     if atcoder_user_name == nil
